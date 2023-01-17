@@ -5,25 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NeuralStyleTransfer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Neural Style Transfer" Height="450" Width="800" FontSize="16" FontFamily="Times New Roman">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20"/>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="20"/>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
 
-        <Image x:Name="ContentImage" Grid.Row="0" Grid.Column="0"/>
-        <Image x:Name="StyleImage" Grid.Row="0" Grid.Column="1"/>
-        <Image x:Name="ResultImage" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"/>
-
-        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-            <Button x:Name="LoadContentButton" Content="Load Content Image" Click="LoadContentButton_Click"/>
-            <Button x:Name="LoadStyleButton" Content="Load Style Image" Click="LoadStyleButton_Click"/>
-            <Button x:Name="TransferButton" Content="Transfer Style" Click="TransferButton_Click"/>
-        </StackPanel>
+        <Button x:Name="Content_Btn" Grid.Column="1" Grid.Row="2" MinWidth="50" HorizontalAlignment="Center" Click="Content_Btn_Click">Obraz kontent</Button>
+        <Button x:Name="Style_Btn" Grid.Column="3" Grid.Row="2" MinWidth="50" HorizontalAlignment="Center" Click="Style_Btn_Click">Obraz style</Button>
+        <Image x:Name="Image_content" Grid.Column="1" Grid.Row="3"></Image>
+        <Image x:Name="Image_style" Grid.Column="3" Grid.Row="3"></Image>
+        <Button x:Name="Transform_Btn" Grid.Column="1" Grid.Row="4" Click="Transform_Btn_Click" IsEnabled="False">Generuj</Button>
+        <TextBlock Grid.Column="3" Grid.Row="4">Progres:</TextBlock>
+        
     </Grid>
 </Window>

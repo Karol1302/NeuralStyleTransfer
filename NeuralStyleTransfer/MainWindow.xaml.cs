@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,33 +36,14 @@ namespace NeuralStyleTransfer
 
             try
             {
-                _net = CvDnn.ReadNetFromTensorflow("model.pb");
+                _net = CvDnn.ReadNetFromTensorflow("C:\\Users\\karol\\Documents\\GitHub\\NeuralStyleTransfer\\NeuralStyleTransfer\\saved_model.pb");
             }
             catch (Exception e)
             {
                 MessageBox.Show("Nie mozna załadowac modelu: " + e.Message);
             }
         }
-        private void BtnStart_Click(object sender, RoutedEventArgs e)
-        {
-            _content = Cv2.ImRead("content.jpg");
-            if (_content.Empty())
-            {
-                MessageBox.Show("An error occurred while loading the content image.");
-                return;
-            }
-
-            _style = Cv2.ImRead("style.jpg");
-            if (_style.Empty())
-            {
-                MessageBox.Show("An error occurred while loading the style image.");
-                return;
-            }
-
-            var result = TransferStyle(_content, _style);
-            Cv2.ImWrite("result.jpg", result);
-        }
-
+        /*
         private Mat TransferStyle(Mat content, Mat style)
         {
             var contentBlob = CvDnn.BlobFromImage(content, 1.0, new OpenCvSharp.Size(Width, Height));
@@ -75,6 +57,52 @@ namespace NeuralStyleTransfer
             var result = output.GetBlob("generated").MatRef();
 
             return result;
+        }
+        */
+        private void Content_Btn_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "JPG files (*.jpg)|*.jpg|PNG files (*.png)|*.png|BMP files (*.bmp)|*.bmp|All files (*.*)|*.*"
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                _content = Cv2.ImRead(openFileDialog.FileName);
+
+                if (_content.Empty())
+                {
+                    MessageBox.Show("An error occurred while loading the content image.");
+                    return;
+                }
+            }
+            Image_content.Source = new BitmapImage(new Uri(openFileDialog.FileName));
+        }
+
+        private void Style_Btn_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "JPG files (*.jpg)|*.jpg|PNG files (*.png)|*.png|BMP files (*.bmp)|*.bmp|All files (*.*)|*.*"
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                _style = Cv2.ImRead(openFileDialog.FileName);
+
+                if (_style.Empty())
+                {
+                    MessageBox.Show("An error occurred while loading the content image.");
+                    return;
+                }
+            }
+            Image_style.Source = new BitmapImage(new Uri(openFileDialog.FileName));
+
+        }
+
+        private void Transform_Btn_Click(object sender, RoutedEventArgs e)
+        {
+            /*var result = TransferStyle(_content, _style);
+            Cv2.ImWrite("result.jpg", result);
+            */
         }
     }
 }
