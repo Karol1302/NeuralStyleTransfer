@@ -16,6 +16,10 @@ using System.Windows.Shapes;
 using OpenCvSharp;
 using OpenCvSharp.Dnn;
 using Window = System.Windows.Window;
+using Tensorflow;
+using Microsoft.ML;
+using Microsoft.ML.Data;
+using Microsoft.ML.OnnxRuntime;
 
 namespace NeuralStyleTransfer
 {
@@ -29,6 +33,7 @@ namespace NeuralStyleTransfer
         private const int Height = 512;
         private Mat _content;
         private Mat _style;
+        private double _progress;
 
         public MainWindow()
         {
@@ -36,14 +41,20 @@ namespace NeuralStyleTransfer
 
             try
             {
-                _net = CvDnn.ReadNetFromTensorflow("C:\\Users\\karol\\Documents\\GitHub\\NeuralStyleTransfer\\NeuralStyleTransfer\\saved_model.pb");
+                var loader = new MyModelLoader(_net);
+                loader.Build("model.onnx");
+                /*
+                var modelLoader = new MyModelLoader("model.onnx");
+                _net = modelLoader.GetModel();*/
             }
             catch (Exception e)
             {
                 MessageBox.Show("Nie mozna załadowac modelu: " + e.Message);
             }
+
         }
-        /*
+
+
         private Mat TransferStyle(Mat content, Mat style)
         {
             var contentBlob = CvDnn.BlobFromImage(content, 1.0, new OpenCvSharp.Size(Width, Height));
@@ -54,11 +65,12 @@ namespace NeuralStyleTransfer
 
             var output = _net.Forward();
 
-            var result = output.GetBlob("generated").MatRef();
+            var result = CvDnn.BlobFromImage(output);
+            result.SaveImage("output.jpg");
 
             return result;
         }
-        */
+        
         private void Content_Btn_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
@@ -75,7 +87,14 @@ namespace NeuralStyleTransfer
                     return;
                 }
             }
+            if (string.IsNullOrEmpty(openFileDialog.FileName))
+            {
+                MessageBox.Show("Nie wybrano pliku.");
+                return;
+            }
             Image_content.Source = new BitmapImage(new Uri(openFileDialog.FileName));
+
+
         }
 
         private void Style_Btn_Click(object sender, RoutedEventArgs e)
@@ -94,15 +113,25 @@ namespace NeuralStyleTransfer
                     return;
                 }
             }
+            if (string.IsNullOrEmpty(openFileDialog.FileName))
+            {
+                MessageBox.Show("Nie wybrano pliku.");
+                return;
+            }
             Image_style.Source = new BitmapImage(new Uri(openFileDialog.FileName));
+
 
         }
 
         private void Transform_Btn_Click(object sender, RoutedEventArgs e)
         {
-            /*var result = TransferStyle(_content, _style);
+            if (_content == null || _style == null)
+            {
+                MessageBox.Show("An error occurred while loading the image. Please make sure both content and style images are loaded.");
+                return;
+            }
+            var result = TransferStyle(_content, _style);
             Cv2.ImWrite("result.jpg", result);
-            */
         }
     }
 }

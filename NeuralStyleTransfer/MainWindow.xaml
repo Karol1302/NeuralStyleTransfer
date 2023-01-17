@@ -28,7 +28,7 @@
         <Image x:Name="Image_content" Grid.Column="1" Grid.Row="3"></Image>
         <Image x:Name="Image_style" Grid.Column="3" Grid.Row="3"></Image>
         <Button x:Name="Transform_Btn" Grid.Column="1" Grid.Row="4" Click="Transform_Btn_Click" IsEnabled="False">Generuj</Button>
-        <TextBlock Grid.Column="3" Grid.Row="4">Progres:</TextBlock>
+        <ProgressBar x:Name="ProgressBar" Minimum="0" Maximum="100" Value="{Binding _progress}" Grid.Column="3" Grid.Row="4" />
         
     </Grid>
 </Window>
