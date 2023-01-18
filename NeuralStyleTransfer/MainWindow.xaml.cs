@@ -44,11 +44,11 @@ namespace NeuralStyleTransfer
             {
                 //_net = Net.ReadNetFromONNX("model.onnx");
                 //_net = Net.ReadNetFromTensorflow("model.pb");
-                _net = Net.ReadNet("model.onnx");
+                //_net = Net.ReadNet("model.onnx");
 
-                //var modelLoader = new MyModelLoader("model.pb");
+                var modelLoader = new MyModelLoader("model.pb");
 
-                //_net = modelLoader.GetModel();
+                _net = modelLoader.GetModel();
                 
             }
             catch (Exception e)
