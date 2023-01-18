@@ -21,14 +21,16 @@
             <ColumnDefinition Width="20"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
 
         <Button x:Name="Content_Btn" Grid.Column="1" Grid.Row="2" MinWidth="50" HorizontalAlignment="Center" Click="Content_Btn_Click">Obraz kontent</Button>
         <Button x:Name="Style_Btn" Grid.Column="3" Grid.Row="2" MinWidth="50" HorizontalAlignment="Center" Click="Style_Btn_Click">Obraz style</Button>
         <Image x:Name="Image_content" Grid.Column="1" Grid.Row="3"></Image>
         <Image x:Name="Image_style" Grid.Column="3" Grid.Row="3"></Image>
-        <Button x:Name="Transform_Btn" Grid.Column="1" Grid.Row="4" Click="Transform_Btn_Click" IsEnabled="False">Generuj</Button>
-        <ProgressBar x:Name="ProgressBar" Minimum="0" Maximum="100" Value="{Binding _progress}" Grid.Column="3" Grid.Row="4" />
-        
+        <Button x:Name="Transform_Btn" Grid.Column="5" Grid.Row="2" MinWidth="50" HorizontalAlignment="Center" Click="Transform_Btn_Click" IsEnabled="False">Generuj</Button>
+        <ProgressBar x:Name="ProgressBar" Minimum="0" Maximum="100" Value="{Binding _progress}" Grid.Column="3" Grid.Row="5" />
+        <Image x:Name="Image_result" Grid.Column="5" Grid.Row="3"></Image>
     </Grid>
 </Window>

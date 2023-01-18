@@ -34,6 +34,8 @@ namespace NeuralStyleTransfer
         private Mat _content;
         private Mat _style;
         private double _progress;
+        private bool _contentImageLoaded;
+        private bool _styleImageLoaded;
 
         public MainWindow()
         {
@@ -41,16 +43,20 @@ namespace NeuralStyleTransfer
 
             try
             {
-                var loader = new MyModelLoader(_net);
-                loader.Build("model.onnx");
+                _net = Net.ReadNetFromONNX("model.onnx");
+
+                //_net = Net.ReadNet("model.onnx");
                 /*
                 var modelLoader = new MyModelLoader("model.onnx");
-                _net = modelLoader.GetModel();*/
+                _net = modelLoader.GetModel();
+                */
             }
             catch (Exception e)
             {
                 MessageBox.Show("Nie mozna załadowac modelu: " + e.Message);
             }
+            _contentImageLoaded = false;
+            _styleImageLoaded = false;
 
         }
 
@@ -93,8 +99,10 @@ namespace NeuralStyleTransfer
                 return;
             }
             Image_content.Source = new BitmapImage(new Uri(openFileDialog.FileName));
+            _contentImageLoaded = true;
 
-
+            if (_contentImageLoaded && _styleImageLoaded)
+                Transform_Btn.IsEnabled = true;
         }
 
         private void Style_Btn_Click(object sender, RoutedEventArgs e)
@@ -119,8 +127,10 @@ namespace NeuralStyleTransfer
                 return;
             }
             Image_style.Source = new BitmapImage(new Uri(openFileDialog.FileName));
+            _styleImageLoaded = true;
 
-
+            if (_contentImageLoaded && _styleImageLoaded)
+                Transform_Btn.IsEnabled = true;
         }
 
         private void Transform_Btn_Click(object sender, RoutedEventArgs e)
@@ -132,6 +142,8 @@ namespace NeuralStyleTransfer
             }
             var result = TransferStyle(_content, _style);
             Cv2.ImWrite("result.jpg", result);
+            Image_result.Source = new BitmapImage(new Uri("result.jpg", UriKind.Relative));
+
         }
     }
 }

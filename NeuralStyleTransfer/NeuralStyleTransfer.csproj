@@ -8,8 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="model.onnx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="model.onnx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.ML" Version="2.0.0" />
+    <PackageReference Include="Microsoft.ML.OnnxConverter" Version="0.20.0" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.13.1" />
+    <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="2.0.0" />
     <PackageReference Include="Microsoft.ML.TensorFlow" Version="2.0.0" />
     <PackageReference Include="OpenCvSharp4" Version="4.7.0.20230115" />
     <PackageReference Include="OpenCvSharp4.Extensions" Version="4.7.0.20230115" />
