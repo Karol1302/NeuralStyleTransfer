@@ -20,6 +20,7 @@ using Tensorflow;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.OnnxRuntime;
+using Tensorflow.Util;
 
 namespace NeuralStyleTransfer
 {
@@ -29,8 +30,6 @@ namespace NeuralStyleTransfer
     public partial class MainWindow : Window
     {
         private readonly Net _net;
-        private const int Width = 512;
-        private const int Height = 512;
         private Mat _content;
         private Mat _style;
         private double _progress;
@@ -43,33 +42,55 @@ namespace NeuralStyleTransfer
 
             try
             {
-                _net = Net.ReadNetFromONNX("model.onnx");
-
+                //_net = Net.ReadNetFromONNX("model.onnx");
+                //_net = Net.ReadNetFromTensorflow("model.pb");
                 //_net = Net.ReadNet("model.onnx");
-                /*
-                var modelLoader = new MyModelLoader("model.onnx");
+
+                var modelLoader = new MyModelLoader("model.pb");
+
                 _net = modelLoader.GetModel();
-                */
+                
             }
             catch (Exception e)
             {
-                MessageBox.Show("Nie mozna załadowac modelu: " + e.Message);
+                MessageBox.Show("Failed to load the model: " + e.Message);
             }
+
             _contentImageLoaded = false;
             _styleImageLoaded = false;
 
-        }
+            if (_net != null)
+            {
+                //Próby
+                _net.SetPreferableTarget(Target.CPU);
+                _net.SetPreferableBackend(Backend.INFERENCE_ENGINE);
+            }
 
+        }
 
         private Mat TransferStyle(Mat content, Mat style)
         {
-            var contentBlob = CvDnn.BlobFromImage(content, 1.0, new OpenCvSharp.Size(Width, Height));
-            var styleBlob = CvDnn.BlobFromImage(style, 1.0, new OpenCvSharp.Size(Width, Height));
 
-            _net.SetInput(contentBlob, "content");
-            _net.SetInput(styleBlob, "style");
+            var newContent = new Mat();
+            var newStyle = new Mat();
 
-            var output = _net.Forward();
+            //zapytaj uzytkownika, czy skalować obrazy
+            //if, jakby wejściowy obraz nie musiał byc skalowany
+
+            Cv2.Resize(content, newContent, new OpenCvSharp.Size(256, 256));
+            Cv2.Resize(style, newStyle, new OpenCvSharp.Size(256, 256));
+            var contentBlob = CvDnn.BlobFromImage(newContent, 1.0, new OpenCvSharp.Size(256, 256));
+            var styleBlob = CvDnn.BlobFromImage(newStyle, 1.0, new OpenCvSharp.Size(256, 256));
+
+            /*
+            var contentBlob = CvDnn.BlobFromImage(content, 1.0, new OpenCvSharp.Size(256, 256));
+            var styleBlob = CvDnn.BlobFromImage(style, 1.0, new OpenCvSharp.Size(256, 256));
+            */
+
+            _net.SetInput(contentBlob, "content_input");
+            _net.SetInput(styleBlob, "style_input");
+
+            var output = _net.Forward("output");
 
             var result = CvDnn.BlobFromImage(output);
             result.SaveImage("output.jpg");
