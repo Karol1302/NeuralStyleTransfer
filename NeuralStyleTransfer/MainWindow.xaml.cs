@@ -135,11 +135,13 @@ namespace NeuralStyleTransfer
 
         private void Transform_Btn_Click(object sender, RoutedEventArgs e)
         {
+            /*
             if (_content == null || _style == null)
             {
                 MessageBox.Show("An error occurred while loading the image. Please make sure both content and style images are loaded.");
                 return;
             }
+            */
             var result = TransferStyle(_content, _style);
             Cv2.ImWrite("result.jpg", result);
             Image_result.Source = new BitmapImage(new Uri("result.jpg", UriKind.Relative));
