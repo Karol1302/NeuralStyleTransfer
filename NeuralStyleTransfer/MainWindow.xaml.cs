@@ -46,10 +46,18 @@ namespace NeuralStyleTransfer
                 //_net = Net.ReadNetFromTensorflow("model.pb");
                 //_net = Net.ReadNet("model.onnx");
 
-                var modelLoader = new MyModelLoader("model.pb");
+                //var modelLoader = new MyModelLoader("model.pb");
 
-                _net = modelLoader.GetModel();
-                
+                //_net = modelLoader.GetModel();
+
+                string filePath = "C:\\Users\\karol\\Documents\\GitHub\\NeuralStyleTransfer\\NeuralStyleTransfer\\model.onnx";
+                if (!File.Exists(filePath))
+                {
+                    MessageBox.Show("Model file does not exist at: " + filePath);
+                    return;
+                }
+                _net = Net.ReadNetFromONNX(filePath);
+
             }
             catch (Exception e)
             {
