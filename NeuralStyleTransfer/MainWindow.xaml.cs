@@ -17,12 +17,9 @@ using OpenCvSharp;
 using OpenCvSharp.Dnn;
 using Window = System.Windows.Window;
 using Tensorflow;
-using Microsoft.ML;
-using Microsoft.ML.Data;
-using Microsoft.ML.OnnxRuntime;
-using Tensorflow.Util;
-using Tensorflow.Hub;
-using Microsoft.ML.OnnxRuntime.Tensors;
+using Tensor = Tensorflow.Tensor;
+using Tensorflow.Gradients;
+using Tensorflow.Framework;
 
 namespace NeuralStyleTransfer
 {
@@ -71,6 +68,8 @@ namespace NeuralStyleTransfer
 
         private Mat TransferStyle(Mat content, Mat style)
         {
+
+            /*
             Cv2.Resize(content, content, new OpenCvSharp.Size(174, 175));
             Cv2.CvtColor(content, content, ColorConversionCodes.BGR2RGB);
 
@@ -90,13 +89,26 @@ namespace NeuralStyleTransfer
             Cv2.CvtColor(content, content, ColorConversionCodes.BGR2RGB);
             Cv2.Resize(style, style, new OpenCvSharp.Size(256, 256));
             Cv2.CvtColor(style, style, ColorConversionCodes.BGR2RGB);
+            Cv2.HConcat(content, style, inputBlob);
             */
 
+            Cv2.Resize(content, content, new OpenCvSharp.Size(174, 175));
+            Cv2.CvtColor(content, content, ColorConversionCodes.BGR2RGB);
 
-            //Jak mogę połączyć dwa bloby 4d, bo ponizsza wersja nie działa, daje nulla
-            Cv2.HConcat(content, style, inputBlob);
+            var contentTensor = Graph.ImportTensor(content.ToBytes(), "content");
+            contentTensor = contentTensor.Reshape(new TensorShape(174, 175, 176, 3));
 
-            _net.SetInput(inputBlob, "input_1");
+            Cv2.Resize(style, style, new OpenCvSharp.Size(174, 175));
+            Cv2.CvtColor(style, style, ColorConversionCodes.BGR2RGB);
+
+            var styleTensor = Tensorflow.Graph.ImportTensor(style.ToBytes(), "style");
+            styleTensor = styleTensor.Reshape(new tensor_shape(174, 175, 176, 3));
+            var inputTensor = Tensor.Concat(new Tensor[] { contentTensor, styleTensor }, 3);
+
+            return inputTensor;
+
+
+        _net.SetInput(inputTensor, "input_1");
  
             var output = _net.Forward("output");
 
