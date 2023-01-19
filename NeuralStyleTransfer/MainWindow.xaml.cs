@@ -21,6 +21,8 @@ using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.OnnxRuntime;
 using Tensorflow.Util;
+using Tensorflow.Hub;
+using Microsoft.ML.OnnxRuntime.Tensors;
 
 namespace NeuralStyleTransfer
 {
@@ -35,6 +37,7 @@ namespace NeuralStyleTransfer
         private double _progress;
         private bool _contentImageLoaded;
         private bool _styleImageLoaded;
+        private Mat inputBlob;
 
         public MainWindow()
         {
@@ -46,18 +49,15 @@ namespace NeuralStyleTransfer
                 //_net = Net.ReadNetFromTensorflow("model.pb");
                 //_net = Net.ReadNet("model.onnx");
 
-                //var modelLoader = new MyModelLoader("model.pb");
-
-                //_net = modelLoader.GetModel();
-
-                string filePath = "C:\\Users\\karol\\Documents\\GitHub\\NeuralStyleTransfer\\NeuralStyleTransfer\\model.onnx";
+                string filePath = "C:\\Users\\karol\\Documents\\GitHub\\NeuralStyleTransfer\\NeuralStyleTransfer\\keras_model.onnx";
                 if (!File.Exists(filePath))
                 {
                     MessageBox.Show("Model file does not exist at: " + filePath);
                     return;
                 }
-                _net = Net.ReadNetFromONNX(filePath);
 
+                var modelLoader = new MyModelLoader(filePath);
+                _net = modelLoader.GetModel();
             }
             catch (Exception e)
             {
@@ -67,37 +67,37 @@ namespace NeuralStyleTransfer
             _contentImageLoaded = false;
             _styleImageLoaded = false;
 
-            if (_net != null)
-            {
-                //Próby
-                _net.SetPreferableTarget(Target.CPU);
-                _net.SetPreferableBackend(Backend.INFERENCE_ENGINE);
-            }
-
         }
 
         private Mat TransferStyle(Mat content, Mat style)
         {
+            Cv2.Resize(content, content, new OpenCvSharp.Size(174, 175));
+            Cv2.CvtColor(content, content, ColorConversionCodes.BGR2RGB);
 
-            var newContent = new Mat();
-            var newStyle = new Mat();
+            var blob1 = CvDnn.BlobFromImage(content, 1.0, new OpenCvSharp.Size(176, 3));
 
-            //zapytaj uzytkownika, czy skalować obrazy
-            //if, jakby wejściowy obraz nie musiał byc skalowany
+            Cv2.Resize(style, style, new OpenCvSharp.Size(174, 175));
+            Cv2.CvtColor(style, style, ColorConversionCodes.BGR2RGB);
 
-            Cv2.Resize(content, newContent, new OpenCvSharp.Size(256, 256));
-            Cv2.Resize(style, newStyle, new OpenCvSharp.Size(256, 256));
-            var contentBlob = CvDnn.BlobFromImage(newContent, 1.0, new OpenCvSharp.Size(256, 256));
-            var styleBlob = CvDnn.BlobFromImage(newStyle, 1.0, new OpenCvSharp.Size(256, 256));
+            var blob2 = CvDnn.BlobFromImage(style, 1.0, new OpenCvSharp.Size(176, 3));
 
             /*
             var contentBlob = CvDnn.BlobFromImage(content, 1.0, new OpenCvSharp.Size(256, 256));
             var styleBlob = CvDnn.BlobFromImage(style, 1.0, new OpenCvSharp.Size(256, 256));
             */
+            /*
+            Cv2.Resize(content, content, new OpenCvSharp.Size(256, 256));
+            Cv2.CvtColor(content, content, ColorConversionCodes.BGR2RGB);
+            Cv2.Resize(style, style, new OpenCvSharp.Size(256, 256));
+            Cv2.CvtColor(style, style, ColorConversionCodes.BGR2RGB);
+            */
 
-            _net.SetInput(contentBlob, "content_input");
-            _net.SetInput(styleBlob, "style_input");
 
+            //Jak mogę połączyć dwa bloby 4d, bo ponizsza wersja nie działa, daje nulla
+            Cv2.HConcat(content, style, inputBlob);
+
+            _net.SetInput(inputBlob, "input_1");
+ 
             var output = _net.Forward("output");
 
             var result = CvDnn.BlobFromImage(output);
@@ -105,6 +105,8 @@ namespace NeuralStyleTransfer
 
             return result;
         }
+
+
         
         private void Content_Btn_Click(object sender, RoutedEventArgs e)
         {
@@ -114,7 +116,7 @@ namespace NeuralStyleTransfer
             };
             if (openFileDialog.ShowDialog() == true)
             {
-                _content = Cv2.ImRead(openFileDialog.FileName);
+                _content = new Mat(openFileDialog.FileName);
 
                 if (_content.Empty())
                 {
@@ -142,7 +144,7 @@ namespace NeuralStyleTransfer
             };
             if (openFileDialog.ShowDialog() == true)
             {
-                _style = Cv2.ImRead(openFileDialog.FileName);
+                _style = new Mat(openFileDialog.FileName);
 
                 if (_style.Empty())
                 {
