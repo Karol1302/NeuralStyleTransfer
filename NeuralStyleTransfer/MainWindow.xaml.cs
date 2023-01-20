@@ -23,6 +23,7 @@ using Microsoft.ML.OnnxRuntime;
 using Tensorflow.Util;
 using Tensorflow.Hub;
 using Microsoft.ML.OnnxRuntime.Tensors;
+using Tensor = Tensorflow.Tensor;
 
 namespace NeuralStyleTransfer
 {
@@ -37,7 +38,6 @@ namespace NeuralStyleTransfer
         private double _progress;
         private bool _contentImageLoaded;
         private bool _styleImageLoaded;
-        private Mat inputBlob;
 
         public MainWindow()
         {
@@ -67,7 +67,37 @@ namespace NeuralStyleTransfer
             _contentImageLoaded = false;
             _styleImageLoaded = false;
 
+
         }
+        /*
+             private Tensor<float> ConvertMatToTensor(Mat mat)
+            {
+                var tensor = new Tensor<float>(mat.ToBytes(), mat.Rows, mat.Cols, mat.Channels());
+                tensor = tensor.Reshape(new int[] { 1, mat.Rows, mat.Cols, mat.Channels() });
+                tensor = tensor.Cast<float>() / 255;
+                return tensor;
+            }
+
+            private Mat TransferStyle(Mat content, Mat style)
+            {
+                var contentTensor = ConvertMatToTensor(content);
+                var styleTensor = ConvertMatToTensor(style);
+
+                // Dołączanie tensorów content i style do jednego tensora wejściowego
+                var inputTensor = Tensor.Concat(new[] { contentTensor, styleTensor }, 3);
+                inputTensor = inputTensor.Reshape(new int[] { 1, 174, 175, 76, 3 });
+
+                // Ustawienie tensoru wejściowego jako dane wejściowe sieci i przepuszczenie przez nią
+                _net.SetInput(inputTensor);
+                var output = _net.Forward();
+
+                // Konwersja tensoru wyjściowego na obraz Mat
+                var result = new Mat(output.Shape[1], output.Shape[2], MatType.CV_32FC3, output.ToArray());
+                result.SaveImage("output.jpg");
+                return result;
+            }
+          */
+
 
         private Mat TransferStyle(Mat content, Mat style)
         {
@@ -81,20 +111,9 @@ namespace NeuralStyleTransfer
 
             var blob2 = CvDnn.BlobFromImage(style, 1.0, new OpenCvSharp.Size(176, 3));
 
-            /*
-            var contentBlob = CvDnn.BlobFromImage(content, 1.0, new OpenCvSharp.Size(256, 256));
-            var styleBlob = CvDnn.BlobFromImage(style, 1.0, new OpenCvSharp.Size(256, 256));
-            */
-            /*
-            Cv2.Resize(content, content, new OpenCvSharp.Size(256, 256));
-            Cv2.CvtColor(content, content, ColorConversionCodes.BGR2RGB);
-            Cv2.Resize(style, style, new OpenCvSharp.Size(256, 256));
-            Cv2.CvtColor(style, style, ColorConversionCodes.BGR2RGB);
-            */
+            var inputBlob = new Mat();
 
-
-            //Jak mogę połączyć dwa bloby 4d, bo ponizsza wersja nie działa, daje nulla
-            Cv2.HConcat(content, style, inputBlob);
+            Cv2.HConcat(blob1, blob2, inputBlob);
 
             _net.SetInput(inputBlob, "input_1");
  
@@ -104,6 +123,7 @@ namespace NeuralStyleTransfer
             result.SaveImage("output.jpg");
 
             return result;
+
         }
 
 
